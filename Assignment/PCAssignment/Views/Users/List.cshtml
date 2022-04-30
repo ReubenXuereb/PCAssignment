@@ -1,0 +1,52 @@
+﻿@model IEnumerable<PCAssignment.Models.Files>
+
+@{
+    ViewData["Title"] = "List";
+}
+
+<h1>List</h1>
+
+<p>
+    <a href="/Users/Send">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date Sent
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Text)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Recipient)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+            <tr>
+                <td>
+                    @{
+                        DateTime dt = item.DateSent.ToDateTime();
+                    }
+                    <span>@dt.ToString("g")</span>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Text)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Recipient)
+            </td>
+           <td>
+                    @if (string.IsNullOrEmpty(item.AttachmentUri) == false)
+                    {
+                        <a href="@item.AttachmentUri">Download</a>
+                    }
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

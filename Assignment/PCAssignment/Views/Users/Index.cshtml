@@ -1,0 +1,112 @@
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration config;
+@using Newtonsoft.Json;
+@using Google.Cloud.SecretManager.V1;
+@model PCAssignment.Models.User
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<form method="post" action="/Users/Register">
+
+    <div>
+    <h4>User</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @*@Html.DisplayNameFor(model => model.FirstName)*@
+            First Name
+        </dt>
+        <dd class = "col-sm-10">
+          @*  @Html.DisplayFor(model => model.FirstName)*@
+
+            <input type="text" value="@Model.FirstName" name="FirstName"/>
+
+        </dd>
+        <dt class = "col-sm-2">
+            @*@Html.DisplayNameFor(model => model.LastName)*@
+            Last Name
+        </dt>
+        <dd class = "col-sm-10">
+            @*@Html.DisplayFor(model => model.LastName)*@
+
+            <input type="text" value="@Model.LastName" name="LastName"/>
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt class = "col-sm-2">
+           @* @Html.DisplayNameFor(model => model.MobileNum)*@
+           Mobile Number
+        </dt>
+        <dd class = "col-sm-10">
+           @* @Html.DisplayFor(model => model.MobileNum)*@
+
+            <input type="text" value="@Model.MobileNum" name="MobileNum"/>
+        </dd>
+        <dt class = "col-sm-2">
+            @*@Html.DisplayNameFor(model => model.AvailableCredits)*@
+            Available Credits
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AvailableCredits)
+
+            <input type="text" value="@Model.AvailableCredits" name="AvailableCredits"/>
+        </dd>
+    </dl>
+</div>
+    
+            @{
+                //var connectionString = config["redis"];
+                string projectId = "";
+
+                projectId = config["project"];
+                SecretManagerServiceClient client = SecretManagerServiceClient.Create();
+                SecretVersionName secretVersionName = new SecretVersionName(projectId, "MySecrets", "1");
+                AccessSecretVersionResponse result = client.AccessSecretVersion(secretVersionName);
+                String payload = result.Payload.Data.ToStringUtf8();
+                dynamic myObject = JsonConvert.DeserializeObject(payload);
+                string redis = Convert.ToString(myObject["redis"]);
+
+                var connectionString = redis;
+
+                StackExchange.Redis.ConnectionMultiplexer cm = StackExchange.Redis.ConnectionMultiplexer.Connect(connectionString);
+                var db = cm.GetDatabase();
+
+                var myCredits = db.StringGet("credits");
+
+                List<Credits> creditsList = new List<Credits>();
+
+                if (myCredits.IsNullOrEmpty)
+                {
+                    creditsList = new List<Credits>();
+                }
+                else
+                {
+                    creditsList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Credits>>(myCredits);
+                }
+            }
+
+            <select id="dd" class="form-select btn btn-secondary" name="dropDownCredits">
+
+                @foreach(var creditOption in creditsList)
+                {
+                    <option value="@creditOption.CreditAmmount">@creditOption.CreditOptions</option>
+                }
+             </select>
+             
+
+    <input type="submit" value="Update Details" />
+
+</form>
+
+
+@*<div>
+    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    <a asp-action="Index">Back to List</a>
+</div>*@

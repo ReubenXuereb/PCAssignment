@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\rubxu\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\rubxu\\.nuget\\packages"
+    ]
+  }
+}
